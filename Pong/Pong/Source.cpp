@@ -1,6 +1,6 @@
 #include <allegro5\allegro.h>
 
-int collision(int PaddleL_x, int PaddleL_y,int bouncer_x,int bouncer_y);
+int collision(int PaddleL_x, int PaddleL_y, int bouncer_x, int bouncer_y);
 int main() {
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
@@ -101,6 +101,32 @@ int main() {
 			bouncer_x += bouncer_dx;
 			bouncer_y += bouncer_dy;
 
+			//if the up button is pressed AND we're still below the top wall,
+			//move the box "up" by 4 pixels
+			if (key[0] && PaddleL_y >= 0) {
+				PaddleL_y -= 4.0;
+			}
+
+			if (key1[0] && PaddleR_y > 0) {
+				PaddleR_y -= 4.0;
+			}
+			//if the down button is pressed AND we're still above the bottom wall
+			//move the box "down" by 4 pixels
+			if (key[1] && PaddleL_y <= 480 - 70) {
+				PaddleL_y += 4.0;
+			}
+
+			if (key1[1] && PaddleR_y <= 480 - 70) {
+				PaddleR_y += 4.0;
+			}
+
+			//redraw at every tick of the timer
+			redraw = true;
+
+			//call again for paddleR 
+			if (collision(PaddleL_x, PaddleL_y, bouncer_x, bouncer_y))
+				bouncer_dx = -bouncer_dx;
+
 			//if an event happened, you better redraw
 			redraw = true;
 		}
@@ -111,37 +137,7 @@ int main() {
 			break;
 		}
 
-		//////////////////////////////////////////////////////////////////////////////////////////////////
-		//here's the movement algorithm
-
-		if (ev.type == ALLEGRO_EVENT_TIMER) {
-			//if the up button is pressed AND we're still below the top wall,
-			//move the box "up" by 4 pixels
-			if (key[0] && PaddleL_y >= 0) {
-				PaddleL_y -= 4.0;
-			}
-
-			if (key1[0] && PaddleR_y > 0) {
-					PaddleR_y -= 4.0;
-				}
-			//if the down button is pressed AND we're still above the bottom wall
-			//move the box "down" by 4 pixels
-			if (key[1] && PaddleL_y <= 480 - 70) {
-				PaddleL_y += 4.0;
-			}
 		
-			if (key1[1] && PaddleR_y <= 480 - 70) {
-				PaddleR_y += 4.0;
-			}
-			
-			//redraw at every tick of the timer
-			redraw = true;
-		}
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////
-		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			break;
-		}
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		//here's the algorithm that turns key presses into events
@@ -218,22 +214,31 @@ int main() {
 			al_draw_bitmap(bouncer, bouncer_x, bouncer_y, 0);
 
 			al_flip_display();
-			
+
 		}
-}
+	}
 
-al_destroy_bitmap(PaddleL);
-al_destroy_timer(timer);
-al_destroy_display(display);
-al_destroy_event_queue(event_queue);
+	al_destroy_bitmap(PaddleL);
+	al_destroy_timer(timer);
+	al_destroy_display(display);
+	al_destroy_event_queue(event_queue);
 
-return 0;
+	return 0;
 
 
 
 }
 int collision(int PaddleL_x, int PaddleL_y, int bouncer_x, int bouncer_y) {
-	if (PaddleL_x > bouncer_x + 32) {
+	if ((PaddleL_x > bouncer_x + 32) ||//ball is to the left
+		(PaddleL_x +32< bouncer_x) ||
+		(PaddleL_y > bouncer_y + 32) ||
+		(PaddleL_y +70 < bouncer_y) 
+	
+		)
+	{
+		return 0;//no collision
 
 	}
+	else
+		return 1;//collision
 }
