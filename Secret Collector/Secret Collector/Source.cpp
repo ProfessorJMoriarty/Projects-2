@@ -1,4 +1,6 @@
 #include <allegro5/allegro.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include<allegro5/allegro_primitives.h>
 #include <iostream>
 using namespace std;
@@ -10,6 +12,12 @@ int main()
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
 	ALLEGRO_BITMAP *player = NULL;
+	ALLEGRO_FONT *font = NULL;
+
+	int lives = 3;
+	int time = 800;
+	int speed = 2;
+	//bool collect = false;
 
 	//these two variables hold the x and y positions of the player
 	//initalize these variables to where you want your player to start
@@ -65,6 +73,7 @@ int main()
 	//OR the mouse closing the display
 	while (!doexit)
 	{
+		time--;
 		//prints out player's coordinates
 		cout << player_x << " , " << player_y << endl;
 
@@ -79,43 +88,66 @@ int main()
 			//if the up button is pressed AND we're still below the top wall,
 			//move the box "up" by 4 pixels
 			if ((key[0] && player_y >= 0) &&
-				!(player_x > 70 && player_x <298 && player_y <202 && player_y>194) &&
-				!(player_x > 66 && player_x <202 && player_y <362 && player_y>354))
+				!(player_x > 70 && player_x < 298 && player_y < 202 && player_y>194) &&
+				!(player_x > 66 && player_x < 202 && player_y < 362 && player_y>354) &&
+				!(player_x > 118 && player_x < 402 && player_y > 255 && player_y < 262))
+
 
 
 			{
-				player_y -= 4.0;
+				player_y -= speed;
 			}
 
 			//if the down button is pressed AND we're still above the bottom wall
 			//move the box "down" by 4 pixels
-			if ((key[1] && player_y <= 480 - 32) && 
-			!(player_x > 70 && player_x < 294 && player_y >66 && player_y<72) &&
-			!(player_x > 66 && player_x < 200 && player_y > 266 && player_y<272))
-			
+			if ((key[1] && player_y <= 480 - 32) &&
+				!(player_x > 70 && player_x < 294 && player_y >66 && player_y < 72) &&
+				!(player_x > 66 && player_x < 200 && player_y > 266 && player_y < 272) &&
+				!(player_x > 118 && player_x < 402 && player_y > 206 && player_y < 216))
+
 			{
-				player_y += 4.0;
+				player_y += speed;
 			}
 			//if the left button is pressed AND we're still right of the left wall
 			//move the box left by 4 pixels
 			if ((key[2] && player_x >= 0) &&
-				!(player_x > 296 && player_x <302 && player_y >66 && player_y<198) &&
-				!(player_x > 194 && player_x <202 && player_y >266 && player_y<362))
-			
+				!(player_x > 296 && player_x < 302 && player_y >66 && player_y < 198) &&
+				!(player_x > 194 && player_x < 202 && player_y >266 && player_y < 480) &&
+				!(player_x > 394 && player_x < 402 && player_y >206 && player_y < 262) &&
+				!(player_x > 394 && player_x <402 && player_y >-8 && player_y < 262))
+
 			{
-				
-				player_x -= 4.0;
+
+				player_x -= speed;
 			}
 
 			//if the left button is pressed AND we're still left of the right wall
 			//move the box right by 4 pixels
 			if ((key[3] && player_x <= 640 - 32) &&
-				!(player_x > 66 && player_x <78 && player_y >66 && player_y<198)&&
-				!(player_x > 66 && player_x <78 && player_y >266 && player_y<362))
-			
+				!(player_x > 66 && player_x < 78 && player_y >66 && player_y < 198) &&
+				!(player_x > 66 && player_x < 78 && player_y >266 && player_y < 480) &&
+				!(player_x > 114 && player_x < 120 && player_y >206 && player_y < 262) &&
+				!(player_x > 335 && player_x <340 && player_y >-5 && player_y < 236))
+
 			{
-				player_x += 4.0;
+				player_x += speed;
 			}
+			//DEATH WALL
+			if (player_x > 66 && player_x < 200 && player_y > 266 && player_y < 272) {
+				//reset position to beginning
+				player_x = 50;
+				player_y = 50;
+				speed = 2;
+				//play devestating sound effect
+				//print a nasty message, flip display,pause for a second or two 
+			}
+			//SPEED BUMPS
+		if (player_x > 14 && player_x <70 && player_y > 235 && player_y < 293){ 
+			speed = 4;
+		}
+
+				
+			
 
 			//redraw at every tick of the timer
 			redraw = true;
@@ -181,6 +213,9 @@ int main()
 			case ALLEGRO_KEY_ESCAPE:
 				doexit = true;
 				break;
+
+
+
 			}
 		}
 
@@ -200,9 +235,25 @@ int main()
 			//wall 1
 			al_draw_filled_rectangle(100, 100, 300, 200, al_map_rgb(200, 100, 0));
 
-			al_draw_filled_rectangle(200, 360, 100, 300, al_map_rgb(0, 150, 0)); 
+			al_draw_filled_rectangle(200, 480, 100, 300, al_map_rgb(0, 150, 0)); 
+
+			al_draw_filled_rectangle(400, 260, 150, 240, al_map_rgb(150, 0, 150));
+
+			al_draw_filled_rectangle(370, 5,400 , 250 , al_map_rgb(150, 0, 150));
+
+			//SPEED BUMP
+			al_draw_filled_rectangle(45, 265, 70, 292, al_map_rgb(0, 0, 255));
 
 			al_flip_display();
+
+			al_draw_textf(font, al_map_rgb(255, 255, 255), 100, 10, ALLEGRO_ALIGN_CENTRE, "lives = %i", lives);
+			al_draw_textf(font, al_map_rgb(255, 255, 255), 300, 10, ALLEGRO_ALIGN_CENTRE, "time = %i", time / 10);
+
+
+			//kill game if lives is less than zero
+			if (lives <= 0 || time<0) {
+				al_clear_to_color(al_map_rgb(0, 0, 0));
+				al_draw_text(font, al_map_rgb(255, 0, 255), 350, 300, 0, "GAME OVER");
 
 		}
 	}
